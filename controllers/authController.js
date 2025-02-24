@@ -1,10 +1,9 @@
 "use strict";
 
 const passport = require("passport");
+const argon2 = require("argon2");
 const { body, validationResult } = require("express-validator");
-
 const User = require("../models/user");
-
 const indexImages = require("../helpers/indexImages");
 
 // ########################################################
@@ -30,14 +29,14 @@ exports.sign_up_post = [
   // Validate and sanitize fields
   body("username", "Must be a valid email address")
     .trim()
-    .isLength({ min: 1 })
+    .isLength({ min: 1, max: 256 })
     .isEmail()
     .normalizeEmail()
     .escape(),
-  body("password", "Password required").trim().isLength({ min: 1 }),
+  body("password", "Password required").trim().isLength({ min: 8, max: 256 }),
   body("passConfirm", "Password confirmation must match password")
     .trim()
-    .isLength({ min: 1 })
+    .isLength({ min: 8, max: 256 })
     .custom((value, { req }) => value === req.body.password),
 
   // Process request after validation/sanitization
@@ -64,9 +63,8 @@ exports.sign_up_post = [
 
       // Continue registration
       const user = new User({
-        creator: null,
         username: req.body.username,
-        password: req.body.password
+        password: await argon2.hash(req.body.password),
       });
 
       user.save((err) => {

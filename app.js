@@ -57,16 +57,14 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // -------------- Start Passport ------------------ //
 passport.use(
-  new LocalStrategy((username, password, done) => {
-    User.findOne({ username: username }, (err, user) => {
-      if (err) return done(err);
+  new LocalStrategy(async (username, password, done) => {
+    const user = await User.findOne({ username: username }).exec();
 
-      // Username not found
-      if (!user) return done(null, false, { message: "Incorrect username" });
+    // Username not found
+    if (!user) return done(null, false, { message: "Incorrect credentials" });
 
-      if (user.comparePassword(password)) return done(null, user);
-      else return done(null, false, { message: "Incorrect password" });
-    });
+    if (await user.comparePassword(password)) return done(null, user);
+    else return done(null, false, { message: "Incorrect credentials" });
   })
 );
 
@@ -105,6 +103,9 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 // -------------- End Passport --------------------- //
+
+// Migrations
+require("./migrations/hashPasswords").exec();
 
 // Get access to currentUser variable in all views
 app.use(function (req, res, next) {
