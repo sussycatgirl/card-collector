@@ -354,18 +354,27 @@ exports.add_card_post = async (req, res, next) => {
   const priceType = getPriceType(revHolo, firstEd, prices);
   const marketVal = prices[priceType].market || prices[priceType].mid;
 
-  const card = buildCard.searched(
-    tcgCard,
-    userId,
-    revHolo,
-    marketVal,
-    priceType
-  );
+  let card = await Card.findOne({ id: tcgCard.id, userId, "meta.rarity.reverseHolo": revHolo, custom: false }).exec()
+  if (card) {
+    console.log(card.value)
+    card.value ??= {};
+    card.value.count ??= 1;
+    card.value.count++;
+    console.log(card.value)
+  } else {
+    card = buildCard.searched(
+      tcgCard,
+      userId,
+      revHolo,
+      marketVal,
+      priceType
+    );
+  }
 
   const [errSave, _] = await handle(card.save());
   if (errSave) return next(errSave);
 
-  return res.redirect(`/collection/sets#${card.meta.set.id}`);
+  return res.redirect(`/collection/${card._id}`);
 };
 
 // Handle display add custom card form on GET
