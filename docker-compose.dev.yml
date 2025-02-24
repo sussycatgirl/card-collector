@@ -1,0 +1,13 @@
+# MongoDB container for development
+# docker compose -f docker-compose.dev.yml up
+services:
+  db:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=ghideftgrujdhftrg
+    volumes:
+      - ./dev/db:/data/db:rw
+    ports:
+      - 127.0.0.1:27017:27017
