@@ -53,9 +53,14 @@ block content
                   p.collection-card-name= card.pokemon.name 
                     if card.meta.rarity.reverseHolo 
                       span(style="font-size:.7rem;color:gray")  Reverse Holo
+                    if card.value && card.value.count && card.value.count != 1
+                      span(style="font-size:1rem;color:gray")=` x${card.value.count}`
                   p.collection-card-rarity= card.meta.rarity.type
+              
               div.collection-card-set
                 p= card.meta.set.name
                 p=` (${card.meta.set.number}/${card.meta.set.totalPrint})`
               div.collection-item-value 
                 p= `${curr === "eur" ? "€" : "$"}${(card.value.market * curr_convert).toFixed(2)}` 
+                if card.value && card.value.count && card.value.count != 1
+                  span(style="font-size:0.8rem;color:gray")= `${curr === "eur" ? "€" : "$"}${(card.value.market * curr_convert * card.value.count).toFixed(2)}`
